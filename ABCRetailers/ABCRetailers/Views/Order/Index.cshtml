@@ -1,0 +1,100 @@
+﻿@model IEnumerable<ABCRetailers.Models.Order>
+@{
+	ViewData["Title"] = "Orders";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h2>Orders</h2>
+	<a class="btn btn-primary" asp-action="Create">Add Order</a>
+</div>
+
+@if (TempData["Message"] is string m)
+{
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		@m
+		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+	</div>
+}
+@if (TempData["Error"] is string e)
+{
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		@e
+		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+	</div>
+}
+
+<!-- Search functionality -->
+<div class="row mb-3">
+	<div class="col-md-6">
+		<form method="get" class="d-flex">
+			<input type="text" name="searchTerm" class="form-control me-2" placeholder="Search orders by customer, product, or status..." value="@ViewBag.SearchTerm" />
+			<button type="submit" class="btn btn-outline-primary">Search</button>
+			@if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+			{
+				<a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Clear</a>
+			}
+		</form>
+	</div>
+	<div class="col-md-6 text-end">
+		<button class="btn btn-outline-info" onclick="refreshOrders()">Refresh Status</button>
+	</div>
+</div>
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Order ID</th>
+			<th>Customer</th>
+			<th>Product</th>
+			<th>Quantity</th>
+			<th class="text-end">Total</th>
+			<th>Status</th>
+			<th>Date</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var o in Model)
+		{
+			<tr>
+				<td>@o.OrderId</td>
+				<td>@o.Username</td>
+				<td>@o.ProductName</td>
+				<td>@o.Quantity</td>
+				<td class="text-end">@o.TotalPrice.ToString("C2")</td>
+				<td>
+					<span class="badge @(o.Status switch {
+					"Pending" => "bg-warning text-dark",
+					"Processed" => "bg-success",
+					"Processing" => "bg-info",
+					"Completed" => "bg-success",
+					"Cancelled" => "bg-danger",
+					_ => "bg-secondary"
+				})">
+						@o.Status
+					</span>
+				</td>
+				<td>@o.OrderDate.ToString("MM/dd/yyyy")</td>
+				<td class="text-end">
+					<a class="btn btn-sm btn-outline-info" asp-action="Details" asp-route-id="@o.OrderId">Details</a>
+					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@o.OrderId">Edit</a>
+					<form asp-action="Delete" asp-route-id="@o.OrderId" method="post" class="d-inline">
+						<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this order?');">Delete</button>
+					</form>
+				</td>
+		</tr>
+	}
+</tbody>
+</table>
+
+<script>
+function refreshOrders() {
+	window.location.reload();
+}
+
+// Auto-refresh every 30 seconds to show updated order status
+setInterval(function() {
+	// Only auto-refresh if no search term is active
+	if (!document.querySelector('input[name="searchTerm"]').value) {
+		window.location.reload();
+	}
+}, 30000);
+</script>

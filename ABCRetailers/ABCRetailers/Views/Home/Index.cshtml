@@ -1,0 +1,101 @@
+﻿@model ABCRetailers.Models.ViewModels.HomeViewModel
+@{
+	ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+	<h1 class="display-4">Welcome to ABC Retailers</h1>
+	<p class="lead">Your comprehensive retail management system powered by Azure Storage</p>
+</div>
+
+<div class="row mb-4">
+	<div class="col-md-4">
+		<div class="card text-center">
+			<div class="card-body">
+				<h5 class="card-title">Customers</h5>
+				<h2 class="text-primary">@Model.CustomerCount</h2>
+				<a asp-controller="Customer" asp-action="Index" class="btn btn-primary">Manage Customers</a>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="card text-center">
+			<div class="card-body">
+				<h5 class="card-title">Products</h5>
+				<h2 class="text-success">@Model.ProductCount</h2>
+				<a asp-controller="Product" asp-action="Index" class="btn btn-success">Manage Products</a>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="card text-center">
+			<div class="card-body">
+				<h5 class="card-title">Orders</h5>
+				<h2 class="text-info">@Model.OrderCount</h2>
+				<a asp-controller="Order" asp-action="Index" class="btn btn-info">Manage Orders</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-12">
+		<h3>Featured Products</h3>
+		@if (Model.FeaturedProducts.Any())
+		{
+			<div class="row">
+				@foreach (var product in Model.FeaturedProducts)
+				{
+					<div class="col-md-3 mb-3">
+						<div class="card h-100">
+							@if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+							{
+								<img src="@product.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@product.ProductName" />
+							}
+							<div class="card-body">
+								<h5 class="card-title">@product.ProductName</h5>
+								<p class="card-text">@product.Description</p>
+								<p class="card-text"><strong>@product.Price.ToString("C")</strong></p>
+								<span class="badge @(product.StockAvailable == 0 ? "bg-danger" : product.StockAvailable < 5 ? "bg-warning text-dark" : "bg-success")">
+									Stock: @product.StockAvailable
+								</span>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		}
+		else
+		{
+			<div class="alert alert-info">
+				No products available. <a asp-controller="Product" asp-action="Create">Add your first product</a>
+			</div>
+		}
+	</div>
+</div>
+
+<div class="row mt-4">
+	<div class="col-12">
+		<div class="card">
+			<div class="card-header">
+				<h5>Quick Actions</h5>
+			</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-3">
+						<a asp-controller="Customer" asp-action="Create" class="btn btn-outline-primary w-100 mb-2">Add Customer</a>
+					</div>
+					<div class="col-md-3">
+						<a asp-controller="Product" asp-action="Create" class="btn btn-outline-success w-100 mb-2">Add Product</a>
+					</div>
+					<div class="col-md-3">
+						<a asp-controller="Order" asp-action="Create" class="btn btn-outline-info w-100 mb-2">Create Order</a>
+					</div>
+					<div class="col-md-3">
+						<a asp-controller="Upload" asp-action="Index" class="btn btn-outline-warning w-100 mb-2">Upload Files</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
