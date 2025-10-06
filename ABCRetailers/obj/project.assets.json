@@ -6005,11 +6005,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212\\ABCRetailers\\ABCRetailers.csproj",
+      "projectUniqueName": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.csproj",
       "projectName": "ABCRetailers",
-      "projectPath": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212\\ABCRetailers\\ABCRetailers.csproj",
+      "projectPath": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.csproj",
       "packagesPath": "C:\\Users\\lab_services_student\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212\\ABCRetailers\\obj\\",
+      "outputPath": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -6042,7 +6042,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -6088,7 +6088,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
