@@ -1,11 +1,12 @@
 ﻿using System.Net;
+using System.Web;
 using Azure.Storage.Files.Shares;
 using Azure.Storage.Files.Shares.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace ABCRetailers.Functions
+namespace ABCRetailers.Functions.Functions
 {
     public class WriteFileShareFunction
     {

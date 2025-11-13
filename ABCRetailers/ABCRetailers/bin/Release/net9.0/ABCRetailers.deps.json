@@ -9,7 +9,7 @@
       "ABCRetailers/1.0.0": {
         "dependencies": {
           "Azure.Data.Tables": "12.11.0",
-          "Azure.Storage.Blobs": "12.25.0",
+          "Azure.Storage.Blobs": "12.25.1",
           "Azure.Storage.Files.Shares": "12.23.0",
           "Azure.Storage.Queues": "12.23.0",
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": "9.0.0"
@@ -47,14 +47,14 @@
           }
         }
       },
-      "Azure.Storage.Blobs/12.25.0": {
+      "Azure.Storage.Blobs/12.25.1": {
         "dependencies": {
           "Azure.Storage.Common": "12.24.0"
         },
         "runtime": {
           "lib/net8.0/Azure.Storage.Blobs.dll": {
-            "assemblyVersion": "12.25.0.0",
-            "fileVersion": "12.2500.25.36407"
+            "assemblyVersion": "12.25.1.0",
+            "fileVersion": "12.2500.125.47404"
           }
         }
       },
@@ -1654,12 +1654,12 @@
       "path": "azure.data.tables/12.11.0",
       "hashPath": "azure.data.tables.12.11.0.nupkg.sha512"
     },
-    "Azure.Storage.Blobs/12.25.0": {
+    "Azure.Storage.Blobs/12.25.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-+5rQj7vQ2NsVxEzFeGxRGP44P9GhJcJMEZTaG/w96z/c8mEO6OoawBAr8tJ/0vH1QSVkjfr+IY3GmGpT507I0w==",
-      "path": "azure.storage.blobs/12.25.0",
-      "hashPath": "azure.storage.blobs.12.25.0.nupkg.sha512"
+      "sha512": "sha512-t5BZUBYly3Wi1ksifp8uVLIirE1XJm4MrTI1hsDDA2bi/M1a38m5thwsgdd3HAIkeh5a7lladDkwi1r6ZoLKYQ==",
+      "path": "azure.storage.blobs/12.25.1",
+      "hashPath": "azure.storage.blobs.12.25.1.nupkg.sha512"
     },
     "Azure.Storage.Common/12.24.0": {
       "type": "package",

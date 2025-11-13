@@ -10,6 +10,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using QueueTriggerAttribute = Microsoft.Azure.Functions.Worker.QueueTriggerAttribute;
 
 
 namespace ABCRetailers.Functions.Functions
@@ -29,28 +30,46 @@ namespace ABCRetailers.Functions.Functions
         }
 
         [Function("OrdersQueueTrigger")]
-        public async Task RunAsync([Microsoft.Azure.Functions.Worker.QueueTrigger("%OrderQueueName%", Connection = "AzureWebJobsStorage")] string message)
+        public async Task RunAsync([QueueTrigger("%OrderQueueName%", Connection = "AzureWebJobsStorage")] string message)
         {
-            _logger.LogInformation("Processing order message");
-            var order = JsonSerializer.Deserialize<OrderMessage>(message);
-            if (order == null)
+            try
             {
-                _logger.LogWarning("Queue message could not be parsed");
-                return;
+                _logger.LogInformation("Processing order message: {Message}", message);
+
+                var order = JsonSerializer.Deserialize<OrderMessage>(message);
+                if (order == null)
+                {
+                    _logger.LogWarning("Queue message could not be parsed: {Message}", message);
+                    return;
+                }
+
+                _logger.LogInformation("Deserialized order: OrderId={OrderId}, CustomerId={CustomerId}, Total={Total}",
+                    order.OrderId, order.CustomerId, order.Total);
+
+                var entity = new Order
+                {
+                    PartitionKey = "Order",
+                    RowKey = order.OrderId,
+                    CustomerId = order.CustomerId,
+                    Username = order.CustomerName,
+                    ProductId = order.Items.FirstOrDefault()?.ProductId ?? "",
+                    ProductName = order.ProductName,
+                    OrderDate = order.CreatedUtc,
+                    Quantity = order.Items.FirstOrDefault()?.Quantity ?? 0,
+                    UnitPrice = (double)(order.Items.FirstOrDefault()?.UnitPrice ?? 0),
+                    TotalPrice = (double)order.Total,
+                    Status = "Processed"
+                };
+
+                await _tableClient.UpsertEntityAsync(entity);
+                _logger.LogInformation("Order {OrderId} successfully upserted to table {TableName}",
+                    order.OrderId, _tableClient.Name);
             }
-
-            var entity = new OrderEntity
+            catch (Exception ex)
             {
-                PartitionKey = order.CustomerId,
-                RowKey = order.OrderId,
-                Total = order.Total,
-                Status = "Processed",
-                CreatedUtc = order.CreatedUtc,
-                ItemsJson = JsonSerializer.Serialize(order.Items)
-            };
-
-            await _tableClient.UpsertEntityAsync(entity);
-            _logger.LogInformation("Order {OrderId} upserted to table", order.OrderId);
+                _logger.LogError(ex, "Error processing queue message: {Message}", message);
+                throw; // Re-throw to trigger retry mechanism
+            }
         }
     }
 }

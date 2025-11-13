@@ -14,23 +14,68 @@ namespace ABCRetailers.Services
         {
             _httpClient = httpClient;
             _logger = logger;
-            _baseUrl = configuration["Functions:BaseUrl"] ?? "http://localhost:7081";
+
+            // Try multiple configuration paths and log all attempts
+            var configValue1 = configuration["Functions:BaseUrl"];
+            var configValue2 = configuration["Functions:BaseURL"];
+
+            _logger.LogInformation("Configuration 'Functions:BaseUrl': '{ConfigValue1}'", configValue1);
+            _logger.LogInformation("Configuration 'Functions:BaseURL': '{ConfigValue2}'", configValue2);
+
+            // Log environment info for debugging
+            var environment = configuration["ASPNETCORE_ENVIRONMENT"] ?? "Unknown";
+            _logger.LogInformation("Environment: '{Environment}'", environment);
+
+            _baseUrl = configValue1 ?? configValue2 ?? "http://localhost:7081";
+
+            _logger.LogInformation("FunctionsClient initialized with BaseUrl: '{BaseUrl}'", _baseUrl);
+        }
+
+        private string GetValidBaseUrl()
+        {
+            var validBaseUrl = string.IsNullOrEmpty(_baseUrl) ? "http://localhost:7081" : _baseUrl.TrimEnd('/');
+
+            // Fix common typos in the URL
+            if (validBaseUrl.StartsWith("htpp//"))
+            {
+                validBaseUrl = validBaseUrl.Replace("htpp//", "http://");
+            }
+            else if (validBaseUrl.StartsWith("htpp/"))
+            {
+                validBaseUrl = validBaseUrl.Replace("htpp/", "http://");
+            }
+            else if (!validBaseUrl.StartsWith("http://") && !validBaseUrl.StartsWith("https://"))
+            {
+                validBaseUrl = $"http://{validBaseUrl}";
+            }
+
+            return validBaseUrl;
+        }
+
+        public string GetTestUrl()
+        {
+            return $"{GetValidBaseUrl()}/api/Health";
         }
 
         public async Task<string> EnqueueOrderAsync(Order order)
         {
             try
             {
+                // Debug logging
+                _logger.LogInformation("EnqueueOrderAsync called with BaseUrl: '{BaseUrl}'", _baseUrl);
+
                 var orderMessage = new
                 {
                     orderId = order.OrderId,
                     customerId = order.CustomerId,
+                    customerName = order.Username,
                     items = new[] { new
                     {
                         productId = order.ProductId,
                         quantity = order.Quantity,
                         unitPrice = order.UnitPrice
                     }},
+                    productName = order.ProductName,
                     total = order.TotalPrice,
                     status = "Pending",
                     createdUtc = DateTime.UtcNow
@@ -39,7 +84,25 @@ namespace ABCRetailers.Services
                 var json = JsonSerializer.Serialize(orderMessage);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync($"{_baseUrl}/api/EnqueueOrder", content);
+                // Get valid base URL with typo correction
+                var validBaseUrl = GetValidBaseUrl();
+                var fullUrl = $"{validBaseUrl}/api/EnqueueOrder";
+
+                _logger.LogInformation("Making request to: {FullUrl} (BaseUrl was: '{BaseUrl}')", fullUrl, _baseUrl);
+                _logger.LogInformation("ValidBaseUrl: '{ValidBaseUrl}'", validBaseUrl);
+
+                // Validate the URL before making the request
+                if (!Uri.TryCreate(fullUrl, UriKind.Absolute, out var uri))
+                {
+                    _logger.LogError("Invalid URL constructed: '{FullUrl}'", fullUrl);
+                    throw new InvalidOperationException($"Invalid URL constructed: {fullUrl}");
+                }
+
+                _logger.LogInformation("Validated URI: '{Uri}'", uri.ToString());
+
+                // Create a new HttpClient for this request to avoid any BaseAddress issues
+                using var httpClient = new HttpClient();
+                var response = await httpClient.PostAsync(uri, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -68,7 +131,9 @@ namespace ABCRetailers.Services
                 var content = new StreamContent(fileStream);
                 content.Headers.Add("x-filename", fileName);
 
-                var response = await _httpClient.PostAsync($"{_baseUrl}/api/WriteBlob", content);
+                // Use absolute URL to avoid BaseAddress issues
+                var validBaseUrl = GetValidBaseUrl();
+                var response = await _httpClient.PostAsync($"{validBaseUrl}/api/WriteBlob", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -95,7 +160,10 @@ namespace ABCRetailers.Services
             try
             {
                 var stringContent = new StringContent(content, Encoding.UTF8, "text/plain");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/api/WriteFileShare?path={Uri.EscapeDataString(path)}&name={Uri.EscapeDataString(fileName)}", stringContent);
+                // Use absolute URL to avoid BaseAddress issues
+                var validBaseUrl = GetValidBaseUrl();
+                var queryString = $"?path={Uri.EscapeDataString(path)}&name={Uri.EscapeDataString(fileName)}";
+                var response = await _httpClient.PostAsync($"{validBaseUrl}/api/WriteFileShare{queryString}", stringContent);
 
                 if (response.IsSuccessStatusCode)
                 {

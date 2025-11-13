@@ -8,10 +8,12 @@ namespace ABCRetailers.Controllers
     public class HomeController : Controller
     {
         private readonly IAzureStorageService _storage;
+        private readonly IFunctionsClient _functionsClient;
 
-        public HomeController(IAzureStorageService storage)
+        public HomeController(IAzureStorageService storage, IFunctionsClient functionsClient)
         {
             _storage = storage;
+            _functionsClient = functionsClient;
         }
 
         public async Task<IActionResult> Index()
@@ -34,6 +36,12 @@ namespace ABCRetailers.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public IActionResult TestFunctions()
+        {
+            var testUrl = _functionsClient.GetTestUrl();
+            return Content($"Functions Test URL: {testUrl}");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
