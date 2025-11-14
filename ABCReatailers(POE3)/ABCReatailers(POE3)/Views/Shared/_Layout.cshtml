@@ -8,87 +8,83 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ABCRetailers1.styles.css" asp-append-version="true" />
 </head>
-<body class="app-body">
-    <nav class="glass-nav navbar navbar-expand-lg navbar-dark shadow-sm">
-        <div class="container-fluid px-4">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <a class="brand-badge" asp-controller="Home" asp-action="Index">
-                        <span class="fw-semibold">ABC Retailers</span>
-                        <small class="text-muted d-block">Azure Commerce Hub</small>
-                    </a>
-                    @if (User.Identity?.IsAuthenticated ?? false)
-                    {
-                        <span class="badge bg-dark text-light text-uppercase">@User.Identity?.Name</span>
-                    }
-                </div>
-                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between mt-3 mt-lg-0" id="mainNav">
-                    <ul class="navbar-nav flex-grow-1 gap-2">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Product" asp-action="Index">Products</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Upload" asp-action="Index">Files</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Orders" asp-action="Admin">Admin Board</a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Customer"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Store" asp-action="Index">Shop</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cart" asp-action="Index">Cart</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Orders" asp-action="MyOrders">My Orders</a>
-                            </li>
-                        }
-                    </ul>
-                    <div class="nav-auth d-flex align-items-center gap-2">
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            <form asp-controller="Account" asp-action="Logout" method="post">
-                                <button type="submit" class="btn btn-sm btn-contrast">Sign out</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Sign in</a>
-                            <a class="btn btn-sm btn-contrast" asp-controller="Account" asp-action="Register">Create account</a>
-                        }
-                    </div>
-                </div>
+<body class="app-shell">
+    <aside class="app-sidebar">
+        <div class="sidebar-brand">
+            <span class="logo-dot"></span>
+            <div>
+                <p class="brand-title mb-0">ABC Retailers</p>
+                <small class="text-muted">Azure Commerce Hub</small>
             </div>
         </div>
-    </nav>
 
-    <main class="main-shell container-fluid px-4 py-4">
-        @RenderBody()
-    </main>
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <div class="sidebar-user mb-4">
+                <div class="avatar">@User.Identity?.Name?.FirstOrDefault()</div>
+                <div>
+                    <p class="mb-0 fw-semibold">@User.Identity?.Name</p>
+                    <small class="text-muted">@string.Join(", ", User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</small>
+                </div>
+            </div>
+        }
 
-    <footer class="app-footer text-center py-4">
-        <small>
-            &copy; @DateTime.UtcNow.Year ABC Retailers · Built on Azure ·
-            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </small>
-    </footer>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link" asp-controller="Home" asp-action="Index">Dashboard</a>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <p class="sidebar-label">Operations</p>
+                <a class="sidebar-link" asp-controller="Customer" asp-action="Index">Customers</a>
+                <a class="sidebar-link" asp-controller="Product" asp-action="Index">Products</a>
+                <a class="sidebar-link" asp-controller="Order" asp-action="Index">Orders</a>
+                <a class="sidebar-link" asp-controller="Upload" asp-action="Index">Files</a>
+                <a class="sidebar-link" asp-controller="Orders" asp-action="Admin">Admin Board</a>
+            }
+
+            @if (User.IsInRole("Customer"))
+            {
+                <p class="sidebar-label">Shop</p>
+                <a class="sidebar-link" asp-controller="Store" asp-action="Index">Storefront</a>
+                <a class="sidebar-link" asp-controller="Cart" asp-action="Index">Cart</a>
+                <a class="sidebar-link" asp-controller="Orders" asp-action="MyOrders">My Orders</a>
+            }
+        </nav>
+
+        <div class="mt-auto">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-primary w-100">Sign out</button>
+                </form>
+            }
+            else
+            {
+                <a class="btn btn-outline-primary w-100 mb-2" asp-controller="Account" asp-action="Login">Sign in</a>
+                <a class="btn btn-primary w-100" asp-controller="Account" asp-action="Register">Create account</a>
+            }
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="top-bar mb-4">
+            <div>
+                <h1 class="h4 mb-0">@ViewData["Title"]</h1>
+                <small class="text-muted">@ViewData["Subtitle"]</small>
+            </div>
+        </header>
+
+        <main>
+            @RenderBody()
+        </main>
+
+        <footer class="app-footer text-center py-4 mt-5">
+            <small>
+                &copy; @DateTime.UtcNow.Year ABC Retailers · Built on Azure ·
+                <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </small>
+        </footer>
+    </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

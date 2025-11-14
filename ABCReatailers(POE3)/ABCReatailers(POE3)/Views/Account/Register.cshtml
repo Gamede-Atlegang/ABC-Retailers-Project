@@ -3,23 +3,23 @@
     ViewData["Title"] = "Create Account";
 }
 
-<div class="auth-shell">
-    <div class="auth-card">
-        <h2 class="fw-bold text-light mb-4 text-center">Create your ABC Retailers account</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        <h2 class="mb-4 text-center">Create your ABCRetailers account</h2>
 
         <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="row g-3">
                 <div class="col-md-6">
                     <label asp-for="Name" class="form-label"></label>
                     <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger small"></span>
+                    <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Surname" class="form-label"></label>
                     <input asp-for="Surname" class="form-control" />
-                    <span asp-validation-for="Surname" class="text-danger small"></span>
+                    <span asp-validation-for="Surname" class="text-danger"></span>
                 </div>
             </div>
 
@@ -27,12 +27,12 @@
                 <div class="col-md-6">
                     <label asp-for="Username" class="form-label"></label>
                     <input asp-for="Username" class="form-control" autocomplete="username" />
-                    <span asp-validation-for="Username" class="text-danger small"></span>
+                    <span asp-validation-for="Username" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Email" class="form-label"></label>
                     <input asp-for="Email" class="form-control" autocomplete="email" />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
             </div>
 
@@ -40,12 +40,12 @@
                 <div class="col-md-6">
                     <label asp-for="Phone" class="form-label"></label>
                     <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                    <span asp-validation-for="Phone" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Address" class="form-label"></label>
                     <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger small"></span>
+                    <span asp-validation-for="Address" class="text-danger"></span>
                 </div>
             </div>
 
@@ -53,20 +53,20 @@
                 <div class="col-md-6">
                     <label asp-for="Password" class="form-label"></label>
                     <input asp-for="Password" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="Password" class="text-danger small"></span>
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="ConfirmPassword" class="form-label"></label>
                     <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-contrast mt-4 w-100">Create account</button>
+            <button type="submit" class="btn btn-success mt-4 w-100">Register</button>
 
-            <p class="mt-3 text-center text-muted">
+            <p class="mt-3 text-center">
                 Already have an account?
-                <a asp-action="Login" class="text-decoration-none text-light">Sign in</a>
+                <a asp-action="Login">Sign in</a>
             </p>
         </form>
     </div>

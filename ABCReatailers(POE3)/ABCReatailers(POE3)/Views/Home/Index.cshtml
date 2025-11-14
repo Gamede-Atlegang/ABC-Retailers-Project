@@ -1,22 +1,24 @@
 ﻿@model ABCRetailers_POE3_.Models.View_Models.HomeViewModel
 @{
-	ViewData["Title"] = "Home";
+	ViewData["Title"] = "Dashboard";
+	ViewData["Subtitle"] = "Azure SQL · Storage · Functions";
 }
 
-<section class="hero text-light">
+<section class="hero-panel">
+	<p class="text-uppercase small text-muted mb-2">Overview</p>
 	<h1 class="fw-bold display-5">Hello @User.Identity?.Name 👋</h1>
-	<p class="lead mb-4">Monitor your Azure-powered retail experience from a single glass dashboard.</p>
+	<p class="mb-4 text-muted">Monitor your Azure-powered retail experience from a single dashboard.</p>
 	<div class="d-flex flex-wrap gap-3">
 		@if (User.IsInRole("Admin"))
 		{
-			<a asp-controller="Customer" asp-action="Create" class="btn btn-contrast">Add customer</a>
-			<a asp-controller="Product" asp-action="Create" class="btn btn-outline-light">Add product</a>
-			<a asp-controller="Orders" asp-action="Admin" class="btn btn-outline-light">Review orders</a>
+			<a asp-controller="Customer" asp-action="Create" class="btn btn-primary">Add customer</a>
+			<a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary">Add product</a>
+			<a asp-controller="Orders" asp-action="Admin" class="btn btn-outline-primary">Review orders</a>
 		}
 		else if (User.IsInRole("Customer"))
 		{
-			<a asp-controller="Store" asp-action="Index" class="btn btn-contrast">Go shopping</a>
-			<a asp-controller="Cart" asp-action="Index" class="btn btn-outline-light">View cart</a>
+			<a asp-controller="Store" asp-action="Index" class="btn btn-primary">Go shopping</a>
+			<a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary">View cart</a>
 		}
 	</div>
 </section>

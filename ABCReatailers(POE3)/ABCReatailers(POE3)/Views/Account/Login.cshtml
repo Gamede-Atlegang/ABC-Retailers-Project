@@ -3,37 +3,55 @@
     ViewData["Title"] = "Sign In";
 }
 
-<div class="auth-shell">
-    <div class="auth-card">
-        <h2 class="fw-bold text-light mb-3 text-center">Welcome back</h2>
-        <p class="text-muted text-center mb-4">Sign in to access your personalised workspace.</p>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-2 text-center">Sign in to your account</h2>
+        <p class="text-muted text-center mb-4">Choose the type of account you want to use.</p>
+
+        <div class="btn-group w-100 mb-3" role="group">
+            <a class="btn btn-outline-primary @(Model.Role == "Customer" ? "active" : string.Empty)"
+               asp-action="Login" asp-route-role="Customer" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                Customer Login
+            </a>
+            <a class="btn btn-outline-primary @(Model.Role == "Admin" ? "active" : string.Empty)"
+               asp-action="Login" asp-route-role="Admin" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                Admin Login
+            </a>
+        </div>
 
         <form asp-action="Login" method="post">
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <input type="hidden" asp-for="Role" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="mb-3">
                 <label asp-for="Username" class="form-label"></label>
                 <input asp-for="Username" class="form-control" autocomplete="username" />
-                <span asp-validation-for="Username" class="text-danger small"></span>
+                <span asp-validation-for="Username" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
                 <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                <span asp-validation-for="Password" class="text-danger small"></span>
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
-            <div class="form-check mb-4">
+            <div class="form-check mb-3">
                 <input asp-for="RememberMe" class="form-check-input" />
                 <label asp-for="RememberMe" class="form-check-label"></label>
             </div>
 
-            <button type="submit" class="btn btn-contrast w-100">Sign in</button>
+            <button type="submit" class="btn btn-primary w-100">Sign in as @Model.Role</button>
 
-            <p class="mt-4 text-center text-muted">
-                Need an account?
-                <a asp-action="Register" class="text-decoration-none text-light">Register here</a>
+            <div class="alert alert-info mt-3 small">
+                <strong>Default accounts</strong><br />
+                Customer: <code>customer / Customer@123!</code><br />
+                Admin: <code>admin / Admin@123!</code>
+            </div>
+
+            <p class="mt-3 text-center">
+                New to ABCRetailers?
+                <a asp-action="Register">Create an account</a>
             </p>
         </form>
     </div>

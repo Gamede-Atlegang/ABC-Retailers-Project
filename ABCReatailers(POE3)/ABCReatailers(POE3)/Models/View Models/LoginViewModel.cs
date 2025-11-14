@@ -12,6 +12,10 @@ public class LoginViewModel
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
+    [Required]
+    [Display(Name = "Login as")]
+    public string Role { get; set; } = "Customer";
+
     [Display(Name = "Remember me")]
     public bool RememberMe { get; set; }
 }
