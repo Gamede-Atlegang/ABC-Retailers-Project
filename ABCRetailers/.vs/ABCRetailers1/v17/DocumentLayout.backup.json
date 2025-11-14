@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|c:\\users\\lab_services_student\\desktop\\cldv6212poe\\abcretailers\\abcretailers.functions\\functions\\enqueueorderfunction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|solutionrelative:abcretailers.functions\\functions\\enqueueorderfunction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|c:\\users\\lab_services_student\\desktop\\cldv6212poe\\abcretailers\\abcretailers\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|solutionrelative:abcretailers\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|c:\\users\\lab_services_student\\desktop\\cldv6212poe\\abcretailers\\abcretailers.functions\\functions\\healthfunction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8E83B88C-49C3-4716-A701-1AF0182AACAC}|ABCRetailers.csproj|solutionrelative:abcretailers.functions\\functions\\healthfunction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers\\appsettings.json",
+              "RelativeDocumentMoniker": "ABCRetailers\\appsettings.json",
+              "ToolTip": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers\\appsettings.json",
+              "RelativeToolTip": "ABCRetailers\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-13T19:17:55.528Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "HealthFunction.cs",
+              "DocumentMoniker": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.Functions\\Functions\\HealthFunction.cs",
+              "RelativeDocumentMoniker": "ABCRetailers.Functions\\Functions\\HealthFunction.cs",
+              "ToolTip": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.Functions\\Functions\\HealthFunction.cs",
+              "RelativeToolTip": "ABCRetailers.Functions\\Functions\\HealthFunction.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T18:49:25.043Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "EnqueueOrderFunction.cs",
+              "DocumentMoniker": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.Functions\\Functions\\EnqueueOrderFunction.cs",
+              "RelativeDocumentMoniker": "ABCRetailers.Functions\\Functions\\EnqueueOrderFunction.cs",
+              "ToolTip": "C:\\Users\\lab_services_student\\Desktop\\CLDV6212POE\\ABCRetailers\\ABCRetailers.Functions\\Functions\\EnqueueOrderFunction.cs",
+              "RelativeToolTip": "ABCRetailers.Functions\\Functions\\EnqueueOrderFunction.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T18:48:40.401Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

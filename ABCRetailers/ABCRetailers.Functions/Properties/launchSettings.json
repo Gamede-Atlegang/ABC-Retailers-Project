@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "ABCRetailers.Functions": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7081",
-      "launchBrowser": false
-    }
-  }
-}
