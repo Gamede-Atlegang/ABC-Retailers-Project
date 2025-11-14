@@ -28,6 +28,18 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Cart/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FydFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Customer/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -46,6 +58,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Orders/Admin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXEFkbWluLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Orders/MyOrders.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXE15T3JkZXJzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Order/Create.cshtml]
@@ -82,6 +102,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Store/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Store/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/Upload/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXBsb2FkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/lab_services_student/Desktop/CLDV6212POE/ABCReatailers(POE3)/ABCReatailers(POE3)/Views/_ViewImports.cshtml]

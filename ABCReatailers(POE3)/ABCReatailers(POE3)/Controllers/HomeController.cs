@@ -1,47 +1,50 @@
 using System.Diagnostics;
+using ABCRetailers_POE3_.Data;
 using ABCRetailers_POE3_.Models;
 using ABCRetailers_POE3_.Models.View_Models;
-using ABCRetailers_POE3_.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
+namespace ABCRetailers_POE3_.Controllers;
 
-namespace ABCRetailers_POE3_.Controllers
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly ApplicationDbContext _dbContext;
+
+    public HomeController(ApplicationDbContext dbContext)
     {
-        private readonly IAzureStorageService _storage;
+        _dbContext = dbContext;
+    }
 
-        public HomeController(IAzureStorageService storage)
+    public async Task<IActionResult> Index()
+    {
+        var customersCount = await _dbContext.Customers.CountAsync();
+        var products = await _dbContext.Products
+            .OrderByDescending(p => p.UpdatedDate)
+            .Take(5)
+            .ToListAsync();
+        var productCount = await _dbContext.Products.CountAsync();
+        var orderCount = await _dbContext.Orders.CountAsync();
+
+        var viewModel = new HomeViewModel
         {
-            _storage = storage;
-        }
+            CustomerCount = customersCount,
+            ProductCount = productCount,
+            OrderCount = orderCount,
+            FeaturedProducts = products
+        };
 
-        public async Task<IActionResult> Index()
-        {
-            var customers = await _storage.GetAllEntitiesAsync<Customer>();
-            var products = await _storage.GetAllEntitiesAsync<Product>();
-            var orders = await _storage.GetAllEntitiesAsync<Order>();
+        return View(viewModel);
+    }
 
-            var viewModel = new HomeViewModel
-            {
-                CustomerCount = customers.Count,
-                ProductCount = products.Count,
-                OrderCount = orders.Count,
-                FeaturedProducts = products.Take(5).ToList()
-            };
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 
-            return View(viewModel);
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = HttpContext.TraceIdentifier });
-        }
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = HttpContext.TraceIdentifier });
     }
 }

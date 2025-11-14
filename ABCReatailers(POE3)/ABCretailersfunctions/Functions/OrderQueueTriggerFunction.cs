@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
-using ABCRetailersfunctions.Models;
+using ABCRetailers.Functions.Models;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ABCRetailersfunctions.Functions
+namespace ABCRetailers.Functions
 {
     public class OrdersQueueTriggerFunction
     {
@@ -57,7 +57,7 @@ namespace ABCRetailersfunctions.Functions
                 }
 
                 // Write to the original Order table structure that MVC expects
-                var orderEntity = new ABCRetailersfunctions.Functions.Models.Order
+                var orderEntity = new ABCRetailers.Functions.Models.Order
                 {
                     PartitionKey = "Order",
                     RowKey = order.OrderId,

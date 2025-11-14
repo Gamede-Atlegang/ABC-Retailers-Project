@@ -1,5 +1,7 @@
 using ABCRetailers_POE3_.Data;
 using ABCRetailers_POE3_.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,9 +9,32 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IAzureStorageService, AzureStorageService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddHttpContextAccessor();
 
-// Add Functions client
-builder.Services.AddHttpClient<IFunctionsClient, FunctionsClient>();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
+// Add Functions client with BaseAddress configuration
+builder.Services.AddHttpClient<IFunctionsClient, FunctionsClient>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["Functions:BaseUrl"];
+    if (!string.IsNullOrWhiteSpace(baseUrl))
+    {
+        client.BaseAddress = new Uri(baseUrl);
+    }
+});
 
 // Add Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -41,17 +66,16 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
     try
     {
-        // This will create the database if it doesn't exist
-        // In production, use migrations: dotnet ef database update
-        await dbContext.Database.EnsureCreatedAsync();
-        logger.LogInformation("SQL Database initialized successfully");
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("SQL Database migrated successfully");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Failed to initialize SQL Database. Make sure connection string is correct.");
-        // Don't throw - allow app to start even if SQL DB is not available yet
+        logger.LogError(ex, "Failed to migrate SQL Database. Make sure connection string is correct.");
     }
 }
+
+await DbSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -63,6 +87,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

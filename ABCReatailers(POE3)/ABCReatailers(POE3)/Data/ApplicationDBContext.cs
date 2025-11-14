@@ -1,5 +1,4 @@
-﻿using ABCRetailers_POE3_.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ABCRetailers_POE3_.Data
 {

@@ -1,0 +1,81 @@
+﻿@model IEnumerable<ABCRetailers_POE3_.Models.View_Models.CartItemViewModel>
+@{
+    ViewData["Title"] = "My Cart";
+    var cartTotal = (decimal)(ViewBag.CartTotal ?? 0m);
+}
+
+<h1 class="h3 mb-4">Your Shopping Cart</h1>
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Your cart is empty. <a asp-controller="Store" asp-action="Index">Browse products</a> to add items.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Unit Price</th>
+                    <th style="width: 180px;">Quantity</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="@(!string.IsNullOrWhiteSpace(item.ImageUrl) ? item.ImageUrl : "https://via.placeholder.com/120x120?text=Product")"
+                                     class="rounded me-3" style="width:60px;height:60px;object-fit:cover;" alt="">
+                                <div>
+                                    <strong>@item.ProductName</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@item.UnitPrice.ToString("C")</td>
+                        <td>
+                            <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="cartId" value="@item.CartId" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="0" class="form-control form-control-sm" />
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Update</button>
+                            </form>
+                        </td>
+                        <td class="fw-semibold">@item.LineTotal.ToString("C")</td>
+                        <td class="text-end">
+                            <form asp-action="Remove" method="post">
+                                <input type="hidden" name="cartId" value="@item.CartId" />
+                                <button class="btn btn-link text-danger" type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a class="btn btn-outline-secondary" asp-controller="Store" asp-action="Index">
+            &larr; Continue Shopping
+        </a>
+
+        <div class="text-end">
+            <p class="text-muted mb-1">Cart Total</p>
+            <p class="fs-3 fw-bold">@cartTotal.ToString("C")</p>
+            <form asp-action="Checkout" method="post">
+                <button class="btn btn-success btn-lg" type="submit">Checkout Securely</button>
+            </form>
+        </div>
+    </div>
+}
+

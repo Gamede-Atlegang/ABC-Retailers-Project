@@ -1,0 +1,80 @@
+﻿@model IEnumerable<ABCRetailers_POE3_.Data.Order>
+@{
+    ViewData["Title"] = "Manage Orders";
+    var statuses = ViewBag.Statuses as string[] ?? Array.Empty<string>();
+    var selectedStatus = ViewBag.Status as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3">Order Management</h1>
+        <p class="text-muted mb-0">Update order statuses and monitor processing.</p>
+    </div>
+    <form method="get" class="d-flex gap-2" asp-action="Admin">
+        <select class="form-select" name="status">
+            <option value="">All statuses</option>
+            @foreach (var status in statuses)
+            {
+                if (status == selectedStatus)
+                {
+                    <option value="@status" selected>@status</option>
+                }
+                else
+                {
+                    <option value="@status">@status</option>
+                }
+            }
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">Filter</button>
+    </form>
+</div>
+
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success">@message</div>
+}
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>
+                        @order.Customer?.Name @order.Customer?.Surname<br />
+                        <small class="text-muted">@order.Customer?.Email</small>
+                    </td>
+                    <td>@order.OrderDate.ToString("g")</td>
+                    <td><span class="badge bg-secondary">@order.Status</span></td>
+                    <td>@order.TotalPrice.ToString("C")</td>
+                    <td class="text-end">
+                        <form asp-action="MarkProcessed" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@order.Id" />
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    @(order.Status == "Processed" ? "disabled" : null)>
+                                Mark PROCESSED
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

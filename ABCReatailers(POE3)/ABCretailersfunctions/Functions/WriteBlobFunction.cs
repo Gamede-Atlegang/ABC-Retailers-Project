@@ -9,7 +9,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace ABCretailersfunctions.Functions
+namespace ABCRetailers.Functions
 {
     public class WriteBlobFunction
     {

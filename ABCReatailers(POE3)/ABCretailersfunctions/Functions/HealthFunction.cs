@@ -8,7 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-namespace ABCretailersfunctions.Functions
+namespace ABCRetailers.Functions
 {
     public class HealthFunction
     {
