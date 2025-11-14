@@ -12,7 +12,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ABCretailersfunctions.Functions
+namespace ABCRetailers.Functions
 {
     public class EnqueueOrderFunction
     {

@@ -1,84 +1,128 @@
 ﻿@model ABCRetailers_POE3_.Models.View_Models.HomeViewModel
 @{
-	ViewData["Title"] = "Dashboard";
-	ViewData["Subtitle"] = "Azure SQL · Storage · Functions";
+    ViewData["Title"] = "Home";
 }
 
-<section class="hero-panel">
-	<p class="text-uppercase small text-muted mb-2">Overview</p>
-	<h1 class="fw-bold display-5">Hello @User.Identity?.Name 👋</h1>
-	<p class="mb-4 text-muted">Monitor your Azure-powered retail experience from a single dashboard.</p>
-	<div class="d-flex flex-wrap gap-3">
-		@if (User.IsInRole("Admin"))
-		{
-			<a asp-controller="Customer" asp-action="Create" class="btn btn-primary">Add customer</a>
-			<a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary">Add product</a>
-			<a asp-controller="Orders" asp-action="Admin" class="btn btn-outline-primary">Review orders</a>
-		}
-		else if (User.IsInRole("Customer"))
-		{
-			<a asp-controller="Store" asp-action="Index" class="btn btn-primary">Go shopping</a>
-			<a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary">View cart</a>
-		}
-	</div>
+<section class="py-4 text-center">
+    <p class="text-uppercase text-muted small mb-1">Dashboard</p>
+    <h1 class="display-5 fw-semibold">Welcome to ABC Retailers</h1>
+    <p class="lead text-muted mb-0">Monitor customers, products, and orders from a single pane.</p>
 </section>
 
-<section class="row g-3 mb-4">
-	<div class="col-md-4">
-		<div class="stat-pill">
-			<small class="text-uppercase text-muted">Customers</small>
-			<h3>@Model.CustomerCount</h3>
-			<p class="mb-0 text-muted">Active profiles across regions</p>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<div class="stat-pill">
-			<small class="text-uppercase text-muted">Products</small>
-			<h3>@Model.ProductCount</h3>
-			<p class="mb-0 text-muted">Published SKUs in Azure SQL</p>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<div class="stat-pill">
-			<small class="text-uppercase text-muted">Orders</small>
-			<h3>@Model.OrderCount</h3>
-			<p class="mb-0 text-muted">Processed through Functions</p>
-		</div>
-	</div>
+<section class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-uppercase text-muted small mb-1">Customers</p>
+                        <h2 class="fw-bold text-primary mb-0">@Model.CustomerCount</h2>
+                    </div>
+                    <span class="bg-primary-subtle text-primary-emphasis rounded-circle p-3">
+                        <i class="bi bi-people"></i>
+                    </span>
+                </div>
+                <a asp-controller="Customer" asp-action="Index" class="btn btn-outline-primary w-100 mt-3">Manage Customers</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-uppercase text-muted small mb-1">Products</p>
+                        <h2 class="fw-bold text-success mb-0">@Model.ProductCount</h2>
+                    </div>
+                    <span class="bg-success-subtle text-success-emphasis rounded-circle p-3">
+                        <i class="bi bi-box-seam"></i>
+                    </span>
+                </div>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-success w-100 mt-3">Manage Products</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-uppercase text-muted small mb-1">Orders</p>
+                        <h2 class="fw-bold text-info mb-0">@Model.OrderCount</h2>
+                    </div>
+                    <span class="bg-info-subtle text-info-emphasis rounded-circle p-3">
+                        <i class="bi bi-cart-check"></i>
+                    </span>
+                </div>
+                <a asp-controller="Order" asp-action="Index" class="btn btn-outline-info w-100 mt-3">Manage Orders</a>
+            </div>
+        </div>
+    </div>
 </section>
 
-<section class="app-card mb-4">
-	<div class="d-flex justify-content-between align-items-center mb-3">
-		<div>
-			<h3 class="mb-1">Featured products</h3>
-			<p class="text-muted mb-0">Synced from Azure SQL & Storage</p>
-		</div>
-		@if (User.IsInRole("Admin"))
-		{
-			<a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-contrast">Add product</a>
-		}
-	</div>
-	@if (Model.FeaturedProducts.Any())
-	{
-		<div class="store-grid">
-			@foreach (var product in Model.FeaturedProducts)
-			{
-				<div class="product-card">
-					<img src="@(!string.IsNullOrWhiteSpace(product.ImageUrl) ? product.ImageUrl : "https://via.placeholder.com/400x250?text=Product")" alt="@product.ProductName" />
-					<div class="card-body">
-						<h5 class="fw-semibold">@product.ProductName</h5>
-						<p class="text-muted small mb-2">@product.Description</p>
-						<div class="d-flex justify-content-between align-items-center">
-							<span class="fw-bold">@product.Price.ToString("C")</span>
-							<span class="badge-soft">Stock @product.StockAvailable</span>
-						</div>
-					</div>
-				</div>
-			}
-		</div>
-	}
-	else
-	{
-		<p class="text-muted mb-0">No products yet. <a asp-controller="Product" asp-action="Create">Add your first product</a>.</p>
-	}
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h5 mb-0">Featured Products</h3>
+        <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-secondary">Add Product</a>
+    </div>
+    @if (Model.FeaturedProducts.Any())
+    {
+        <div class="row g-3">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-md-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" class="card-img-top" style="height: 160px; object-fit: cover;" alt="@product.ProductName" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 160px;">
+                                <span class="text-muted">No image</span>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@product.ProductName</h5>
+                            <p class="card-text text-muted small">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">@product.Price.ToString("C")</span>
+                                <span class="badge @(product.StockAvailable == 0 ? "bg-danger" : product.StockAvailable < 5 ? "bg-warning text-dark" : "bg-success")">
+                                    Stock: @product.StockAvailable
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No products available. <a asp-controller="Product" asp-action="Create">Add your first product</a>
+        </div>
+    }
+</section>
+
+<section class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0">
+        <h5 class="mb-0">Quick Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <a asp-controller="Customer" asp-action="Create" class="btn btn-outline-primary w-100">Add Customer</a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a asp-controller="Product" asp-action="Create" class="btn btn-outline-success w-100">Add Product</a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a asp-controller="Order" asp-action="Create" class="btn btn-outline-info w-100">Create Order</a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a asp-controller="Upload" asp-action="Index" class="btn btn-outline-warning w-100">Upload Files</a>
+            </div>
+        </div>
+    </div>
 </section>
