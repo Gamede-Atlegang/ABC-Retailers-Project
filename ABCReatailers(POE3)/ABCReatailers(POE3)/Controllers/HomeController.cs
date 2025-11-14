@@ -2,11 +2,13 @@ using System.Diagnostics;
 using ABCRetailers_POE3_.Data;
 using ABCRetailers_POE3_.Models;
 using ABCRetailers_POE3_.Models.View_Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ABCRetailers_POE3_.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext _dbContext;

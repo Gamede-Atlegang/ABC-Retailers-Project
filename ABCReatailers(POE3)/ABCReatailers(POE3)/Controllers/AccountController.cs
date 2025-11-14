@@ -57,7 +57,7 @@ namespace ABCRetailers_POE3_.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                ModelState.AddModelError(nameof(model.Username), "No account matches that username.");
                 return View(model);
             }
 

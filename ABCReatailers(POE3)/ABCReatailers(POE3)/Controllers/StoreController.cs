@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ABCRetailers_POE3_.Controllers;
 
+
+[Authorize(Roles = "Customer")]
 public class StoreController : Controller
 {
     private readonly ApplicationDbContext _dbContext;

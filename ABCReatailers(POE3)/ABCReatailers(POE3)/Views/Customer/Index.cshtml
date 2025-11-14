@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ABCRetailers_POE3_.Models.Customer>
+﻿@model IEnumerable<ABCRetailers_POE3_.Data.Customer>
 
 @{
 	ViewData["Title"] = "Customers";
@@ -13,14 +13,20 @@
 {
 	<div class="alert alert-success">@m</div>
 }
+@if (TempData["Error"] is string e)
+{
+	<div class="alert alert-danger">@e</div>
+}
 
 <table class="table table-striped">
 	<thead>
 		<tr>
 			<th>Name</th>
+			<th>Customer Code</th>
 			<th>Username</th>
 			<th>Email</th>
-			<th>Shipping Address</th>
+			<th>Phone</th>
+			<th>Address</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -29,12 +35,14 @@
 		{
 			<tr>
 				<td>@c.Name @c.Surname</td>
+				<td>@c.CustomerId</td>
 				<td>@c.Username</td>
 				<td>@c.Email</td>
-				<td>@c.ShippingAddress</td>
+				<td>@c.Phone</td>
+				<td>@c.Address</td>
 				<td class="text-end">
-					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@c.CustomerId">Edit</a>
-					<form asp-action="Delete" asp-route-id="@c.CustomerId" method="post" class="d-inline">
+					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@c.Id">Edit</a>
+					<form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline">
 						<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this customer?');">Delete</button>
 					</form>
 				</td>

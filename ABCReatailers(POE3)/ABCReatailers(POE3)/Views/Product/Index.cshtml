@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ABCRetailers_POE3_.Models.Product>
+﻿@model IEnumerable<ABCRetailers_POE3_.Data.Product>
 
 @{
 	ViewData["Title"] = "Products";
@@ -11,11 +11,17 @@
 {
 	<div class="alert alert-success">@m</div>
 }
+@if (TempData["Error"] is string e)
+{
+	<div class="alert alert-danger">@e</div>
+}
 <table class="table table-striped align-middle">
 	<thead>
 		<tr>
 			<th style="width:110px">Image</th>
+			<th>SKU</th>
 			<th>Name</th>
+			<th>Category</th>
 			<th>Description</th>
 			<th class="text-end">Price</th>
 			<th>Stock</th>
@@ -32,7 +38,9 @@
 						<img src="@p.ImageUrl" class="img-thumbnail" style="max-height:80px" />
 					}
 				</td>
+				<td>@p.ProductId</td>
 				<td>@p.ProductName</td>
+				<td>@p.Category</td>
 				<td>@p.Description</td>
 				<td class="text-end">@p.Price.ToString("C2")</td>
 				<td>
@@ -41,8 +49,8 @@
 					</span>
 				</td>
 				<td class="text-end">
-					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.ProductId">Edit</a>
-					<form asp-action="Delete" asp-route-id="@p.ProductId" method="post" class="d-inline">
+					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id">Edit</a>
+					<form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline">
 						<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?');">Delete</button>
 					</form>
 				</td>

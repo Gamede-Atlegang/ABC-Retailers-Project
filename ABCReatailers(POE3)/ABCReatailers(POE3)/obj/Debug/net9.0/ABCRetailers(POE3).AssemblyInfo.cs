@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ABCRetailers(POE3)")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a763aa329ee22f2f9c331304296972039d73d6f6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b17fe6bdc92ebfc37b990fe6f814a545d9761a7")]
 [assembly: System.Reflection.AssemblyProductAttribute("ABCRetailers(POE3)")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ABCRetailers(POE3)")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

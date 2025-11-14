@@ -1,9 +1,11 @@
 ﻿using ABCRetailers_POE3_.Models;
 using ABCRetailers_POE3_.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABCRetailers_POE3_.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UploadController : Controller
     {
         private readonly IAzureStorageService _storage;

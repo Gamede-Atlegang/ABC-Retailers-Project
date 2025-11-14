@@ -1,82 +1,149 @@
-﻿using ABCRetailers_POE3_.Models;
+﻿using ABCRetailers_POE3_.Data;
 using ABCRetailers_POE3_.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace ABCRetailers_POE3_.Controllers
+namespace ABCRetailers_POE3_.Controllers;
+
+[Authorize(Roles = "Admin")]
+public class ProductController : Controller
 {
-    public class ProductController : Controller
+    private readonly ApplicationDbContext _dbContext;
+    private readonly IAzureStorageService _storage;
+    private readonly ILogger<ProductController> _logger;
+
+    public ProductController(ApplicationDbContext dbContext, IAzureStorageService storage, ILogger<ProductController> logger)
     {
-        private readonly IAzureStorageService _storage;
+        _dbContext = dbContext;
+        _storage = storage;
+        _logger = logger;
+    }
 
-        public ProductController(IAzureStorageService storage)
+    public async Task<IActionResult> Index()
+    {
+        var products = await _dbContext.Products
+            .OrderBy(p => p.ProductName)
+            .ToListAsync();
+
+        return View(products);
+    }
+
+    public IActionResult Create() => View(new Product());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Product model, IFormFile? imageFile)
+    {
+        if (string.IsNullOrWhiteSpace(model.ProductId))
         {
-            _storage = storage;
+            ModelState.Remove(nameof(Product.ProductId));
+            model.ProductId = $"SKU-{Guid.NewGuid():N}".Substring(0, 10).ToUpperInvariant();
         }
 
-        public async Task<IActionResult> Index()
+        if (await _dbContext.Products.AnyAsync(p => p.ProductId == model.ProductId))
         {
-            var products = await _storage.GetAllEntitiesAsync<Product>();
-            return View(products.OrderBy(p => p.ProductName));
+            ModelState.AddModelError(nameof(Product.ProductId), "Product SKU already exists.");
         }
 
-        public IActionResult Create() => View(new Product());
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product model, IFormFile? imageFile)
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid) return View(model);
+            return View(model);
+        }
 
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                model.ImageUrl = await _storage.UploadImageAsync(imageFile, "product-images");
-            }
+        model.CreatedDate = DateTime.UtcNow;
+        model.UpdatedDate = DateTime.UtcNow;
 
-            await _storage.AddEntityAsync(model);
-            TempData["Message"] = "Product created.";
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            model.ImageUrl = await _storage.UploadImageAsync(imageFile, "product-images");
+        }
+
+        _dbContext.Products.Add(model);
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Product created.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Edit(int id)
+    {
+        var product = await _dbContext.Products.FindAsync(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return View(product);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Product model, IFormFile? imageFile)
+    {
+        if (id != model.Id)
+        {
+            return NotFound();
+        }
+
+        if (await _dbContext.Products.AnyAsync(p => p.ProductId == model.ProductId && p.Id != id))
+        {
+            ModelState.AddModelError(nameof(Product.ProductId), "Product SKU already exists.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var product = await _dbContext.Products.FindAsync(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        product.ProductId = model.ProductId;
+        product.ProductName = model.ProductName;
+        product.Description = model.Description;
+        product.Category = model.Category;
+        product.Price = model.Price;
+        product.StockAvailable = model.StockAvailable;
+        product.UpdatedDate = DateTime.UtcNow;
+
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            product.ImageUrl = await _storage.UploadImageAsync(imageFile, "product-images");
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Product updated.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var product = await _dbContext.Products
+            .Include(p => p.OrderItems)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+        {
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Edit(string id)
+        if (product.OrderItems.Any())
         {
-            if (string.IsNullOrWhiteSpace(id)) return NotFound();
-            var entity = await _storage.GetEntityAsync<Product>("Product", id);
-            if (entity is null) return NotFound();
-            return View(entity);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Product model, IFormFile? imageFile)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            model.PartitionKey = "Product";
-
-            if (imageFile == null || imageFile.Length == 0)
-            {
-                // Keep current image
-                var existing = await _storage.GetEntityAsync<Product>("Product", model.RowKey);
-                if (existing != null) model.ImageUrl = existing.ImageUrl;
-            }
-            else
-            {
-                model.ImageUrl = await _storage.UploadImageAsync(imageFile, "product-images");
-            }
-
-            await _storage.UpdateEntityAsync(model);
-            TempData["Message"] = "Product updated.";
+            TempData["Error"] = "Cannot delete a product that is part of existing orders.";
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) return RedirectToAction(nameof(Index));
-            await _storage.DeleteEntityAsync<Product>("Product", id);
-            TempData["Message"] = "Product deleted.";
-            return RedirectToAction(nameof(Index));
-        }
+        _dbContext.Products.Remove(product);
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Product deleted.";
+        return RedirectToAction(nameof(Index));
     }
 }

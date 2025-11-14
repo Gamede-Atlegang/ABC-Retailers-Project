@@ -1,4 +1,4 @@
-﻿@model ABCRetailers_POE3_.Models.Order
+﻿@model ABCRetailers_POE3_.Data.Order
 
 @{
 	ViewData["Title"] = "Edit Order";
@@ -6,26 +6,26 @@
 <h2>Edit Order</h2>
 <hr />
 <form asp-action="Edit" method="post">
-	<input type="hidden" asp-for="PartitionKey" />
-	<input type="hidden" asp-for="RowKey" />
-	<input type="hidden" asp-for="ETag" />
-	<input type="hidden" asp-for="Timestamp" />
+	<input type="hidden" asp-for="Id" />
 	<div class="row g-3">
 		<div class="col-md-6">
 			<label class="form-label">Customer</label>
-			<input value="@Model.Username" class="form-control" readonly />
+			<input value="@($"{Model.Customer?.Name} {Model.Customer?.Surname}")" class="form-control" readonly />
 		</div>
 		<div class="col-md-6">
-			<label class="form-label">Product</label>
-			<input value="@Model.ProductName" class="form-control" readonly />
+			<label class="form-label">Products</label>
+			@{
+				var items = string.Join(", ", Model.OrderItems.Select(i => $"{i.Quantity} x {i.Product?.ProductName ?? i.ProductId.ToString()}"));
+			}
+			<input value="@items" class="form-control" readonly />
 		</div>
 		<div class="col-md-6">
 			<label class="form-label">Quantity</label>
-			<input value="@Model.Quantity" class="form-control" readonly />
+			<input value="@Model.OrderItems.Sum(i => i.Quantity)" class="form-control" readonly />
 		</div>
 		<div class="col-md-6">
 			<label class="form-label">Unit Price</label>
-			<input value="@Model.UnitPrice.ToString("C2")" class="form-control" readonly />
+			<input value="@Model.OrderItems.FirstOrDefault()?.UnitPrice.ToString("C2")" class="form-control" readonly />
 		</div>
 		<div class="col-md-6">
 			<label class="form-label">Total Price</label>

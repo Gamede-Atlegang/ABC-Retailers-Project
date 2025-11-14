@@ -1,213 +1,276 @@
-﻿using ABCRetailers_POE3_.Models;
+﻿using ABCRetailers_POE3_.Data;
+using ABCRetailers_POE3_.Models;
+using ABCRetailers_POE3_.Models.View_Models;
 using ABCRetailers_POE3_.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-namespace ABCRetailers_POE3_.Controllers
+namespace ABCRetailers_POE3_.Controllers;
+
+[Authorize(Roles = "Admin")]
+public class OrderController : Controller
 {
-    public class OrderController : Controller
+    private readonly ApplicationDbContext _dbContext;
+    private readonly IFunctionsClient _functionsClient;
+    private readonly ILogger<OrderController> _logger;
+
+    public OrderController(ApplicationDbContext dbContext, IFunctionsClient functionsClient, ILogger<OrderController> logger)
     {
-        private readonly IAzureStorageService _storage;
-        private readonly IFunctionsClient _functionsClient;
+        _dbContext = dbContext;
+        _functionsClient = functionsClient;
+        _logger = logger;
+    }
 
-        public OrderController(IAzureStorageService storage, IFunctionsClient functionsClient)
+    public async Task<IActionResult> Index(string searchTerm = "")
+    {
+        var query = _dbContext.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .OrderByDescending(o => o.OrderDate)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            _storage = storage;
-            _functionsClient = functionsClient;
+            var lowered = searchTerm.ToLowerInvariant();
+            query = query.Where(o =>
+                o.OrderId.ToLower().Contains(lowered) ||
+                o.Status.ToLower().Contains(lowered) ||
+                (o.Customer != null && (o.Customer.Name + " " + o.Customer.Surname + " " + o.Customer.Username).ToLower().Contains(lowered)) ||
+                o.OrderItems.Any(i => i.Product != null && i.Product.ProductName.ToLower().Contains(lowered)));
         }
 
-        public async Task<IActionResult> Index(string searchTerm = "")
+        var orders = await query.ToListAsync();
+        ViewBag.SearchTerm = searchTerm;
+        return View(orders);
+    }
+
+    public async Task<IActionResult> Create()
+    {
+        var viewModel = await BuildOrderCreateViewModelAsync();
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(OrderCreateViewModel model)
+    {
+        if (!ModelState.IsValid)
         {
-            // Read from the Order table (same table Functions write to)
-            var orders = await _storage.GetAllEntitiesAsync<Order>();
-            var orderedOrders = orders.OrderByDescending(o => o.OrderDate);
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                orderedOrders = orderedOrders.Where(o =>
-                    o.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    o.ProductName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    o.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                ).OrderByDescending(o => o.OrderDate);
-            }
-
-            ViewBag.SearchTerm = searchTerm;
-            return View(orderedOrders);
+            return View(await BuildOrderCreateViewModelAsync(model));
         }
 
-        public async Task<IActionResult> Create()
+        var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Id == model.CustomerId);
+        var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == model.ProductId);
+
+        if (customer == null || product == null)
         {
-            var customers = await _storage.GetAllEntitiesAsync<Customer>();
-            var products = await _storage.GetAllEntitiesAsync<Product>();
-
-            ViewBag.Customers = customers.OrderBy(c => c.Surname).ThenBy(c => c.Name);
-            ViewBag.Products = products.OrderBy(p => p.ProductName);
-
-            return View(new Order());
+            ModelState.AddModelError("", "Invalid customer or product selected.");
+            return View(await BuildOrderCreateViewModelAsync(model));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Order model)
+        if (product.StockAvailable < model.Quantity)
         {
+            ModelState.AddModelError(nameof(model.Quantity), $"Only {product.StockAvailable} unit(s) available.");
+            return View(await BuildOrderCreateViewModelAsync(model));
+        }
 
-            // These are computed server-side; remove from model validation
-            ModelState.Remove(nameof(Order.Username));
-            ModelState.Remove(nameof(Order.ProductName));
+        var order = new Data.Order
+        {
+            OrderId = $"ORD-{Guid.NewGuid():N}".Substring(0, 14).ToUpperInvariant(),
+            CustomerId = customer.Id,
+            OrderDate = DateTime.UtcNow,
+            Status = "Pending",
+            ShippingAddress = string.IsNullOrWhiteSpace(model.ShippingAddress) ? customer.Address : model.ShippingAddress,
+            Notes = "Created via backoffice portal",
+            OrderItems = new List<OrderItem>()
+        };
 
-            if (!ModelState.IsValid)
-            {
-                var customers = await _storage.GetAllEntitiesAsync<Customer>();
-                var products = await _storage.GetAllEntitiesAsync<Product>();
-                ViewBag.Customers = customers.OrderBy(c => c.Surname).ThenBy(c => c.Name);
-                ViewBag.Products = products.OrderBy(p => p.ProductName);
-                return View(model);
-            }
+        var orderItem = new OrderItem
+        {
+            ProductId = product.Id,
+            Quantity = model.Quantity,
+            UnitPrice = product.Price,
+            TotalPrice = product.Price * model.Quantity
+        };
 
-            // Fetch referenced entities
-            var customer = await _storage.GetEntityAsync<Customer>("Customer", model.CustomerId);
-            var product = await _storage.GetEntityAsync<Product>("Product", model.ProductId);
+        order.OrderItems.Add(orderItem);
+        order.TotalPrice = orderItem.TotalPrice;
 
-            if (customer is null || product is null)
-            {
-                ModelState.AddModelError("", "Invalid customer or product selected.");
-                var customers = await _storage.GetAllEntitiesAsync<Customer>();
-                var products = await _storage.GetAllEntitiesAsync<Product>();
-                ViewBag.Customers = customers.OrderBy(c => c.Surname).ThenBy(c => c.Name);
-                ViewBag.Products = products.OrderBy(p => p.ProductName);
-                return View(model);
-            }
+        product.StockAvailable -= model.Quantity;
+        _dbContext.Orders.Add(order);
 
-            // Stock check
-            if (product.StockAvailable < model.Quantity)
-            {
-                ModelState.AddModelError("Quantity", $"Only {product.StockAvailable} item(s) available.");
-                var customers = await _storage.GetAllEntitiesAsync<Customer>();
-                var products = await _storage.GetAllEntitiesAsync<Product>();
-                ViewBag.Customers = customers.OrderBy(c => c.Surname).ThenBy(c => c.Name);
-                ViewBag.Products = products.OrderBy(p => p.ProductName);
-                return View(model);
-            }
+        await _dbContext.SaveChangesAsync();
 
-            // Compose order
-            model.PartitionKey = "Order";
-            model.OrderDate = DateTime.UtcNow;
-            model.Username = customer.Username;
-            model.ProductName = product.ProductName;
-            model.UnitPrice = product.Price;
-            model.TotalPrice = product.Price * model.Quantity;
-            model.Status = "Pending";
+        try
+        {
+            await TriggerServerlessPipelineAsync(order, customer, product, model.Quantity);
+            TempData["Message"] = "Order submitted and queued for processing.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Order {OrderId} saved but failed to enqueue Azure Function workflow.", order.OrderId);
+            TempData["Error"] = "Order saved locally but Azure processing failed. Please retry queue submission.";
+        }
 
-            // Use Functions client to enqueue order (this will trigger the queue function to write to table)
-            try
-            {
-                await _functionsClient.EnqueueOrderAsync(model);
+        return RedirectToAction(nameof(Index));
+    }
 
-                // Decrease stock and save product
-                product.StockAvailable -= model.Quantity;
-                await _storage.UpdateEntityAsync(product);
+    public async Task<IActionResult> Edit(int id)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(o => o.Id == id);
 
-                // Generate receipt and save to Azure Files
-                var receiptContent = $"Order Receipt\n" +
-                    $"Order ID: {model.OrderId}\n" +
-                    $"Customer: {customer.Username}\n" +
-                    $"Product: {product.ProductName}\n" +
-                    $"Quantity: {model.Quantity}\n" +
-                    $"Unit Price: ${model.UnitPrice:F2}\n" +
-                    $"Total: ${model.TotalPrice:F2}\n" +
-                    $"Date: {model.OrderDate:yyyy-MM-dd HH:mm:ss}\n" +
-                    $"Status: {model.Status}";
+        if (order == null)
+        {
+            return NotFound();
+        }
 
-                await _functionsClient.WriteFileAsync(receiptContent, "receipts", $"receipt-{model.OrderId}.txt");
+        return View(order);
+    }
 
-                TempData["Message"] = "Order submitted successfully and is being processed.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Failed to submit order: {ex.Message}";
-                var customers = await _storage.GetAllEntitiesAsync<Customer>();
-                var products = await _storage.GetAllEntitiesAsync<Product>();
-                ViewBag.Customers = customers.OrderBy(c => c.Surname).ThenBy(c => c.Name);
-                ViewBag.Products = products.OrderBy(p => p.ProductName);
-                return View(model);
-            }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Data.Order model)
+    {
+        if (id != model.Id)
+        {
+            return NotFound();
+        }
 
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var order = await _dbContext.Orders.FindAsync(id);
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        order.Status = model.Status;
+        order.Notes = model.Notes;
+        order.UpdatedDate = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Order updated.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Details(int id)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        return View(order);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null)
+        {
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Edit(string id)
+        _dbContext.Orders.Remove(order);
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Order deleted.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetProductPrice(int productId)
+    {
+        var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+        if (product == null)
         {
-            if (string.IsNullOrWhiteSpace(id)) return NotFound();
-            var entity = await _storage.GetEntityAsync<Order>("Order", id);
-            if (entity is null) return NotFound();
-            return View(entity);
+            return Json(new { price = 0m, stock = 0 });
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Order model)
-        {
-            // Remove validation for computed fields
-            ModelState.Remove(nameof(Order.Username));
-            ModelState.Remove(nameof(Order.ProductName));
-            ModelState.Remove(nameof(Order.CustomerId));
-            ModelState.Remove(nameof(Order.ProductId));
-            ModelState.Remove(nameof(Order.Quantity));
-            ModelState.Remove(nameof(Order.UnitPrice));
-            ModelState.Remove(nameof(Order.TotalPrice));
-            ModelState.Remove(nameof(Order.OrderDate));
+        return Json(new { price = product.Price, stock = product.StockAvailable });
+    }
 
-            if (!ModelState.IsValid) return View(model);
-
-            model.PartitionKey = "Order";
-
-            // Preserve the original values that shouldn't change
-            var existingOrder = await _storage.GetEntityAsync<Order>("Order", model.RowKey);
-            if (existingOrder != null)
+    private async Task<OrderCreateViewModel> BuildOrderCreateViewModelAsync(OrderCreateViewModel? existing = null)
+    {
+        var customers = await _dbContext.Customers
+            .OrderBy(c => c.Surname).ThenBy(c => c.Name)
+            .Select(c => new SelectListItem
             {
-                model.Username = existingOrder.Username;
-                model.ProductName = existingOrder.ProductName;
-                model.CustomerId = existingOrder.CustomerId;
-                model.ProductId = existingOrder.ProductId;
-                model.Quantity = existingOrder.Quantity;
-                model.UnitPrice = existingOrder.UnitPrice;
-                model.TotalPrice = existingOrder.TotalPrice;
-                model.OrderDate = existingOrder.OrderDate;
-            }
+                Value = c.Id.ToString(),
+                Text = $"{c.Name} {c.Surname} ({c.CustomerId})"
+            })
+            .ToListAsync();
 
-            await _storage.UpdateEntityAsync(model);
-            TempData["Message"] = "Order updated.";
-            return RedirectToAction(nameof(Index));
-        }
+        customers.Insert(0, new SelectListItem { Value = "", Text = "Select Customer" });
 
-        public async Task<IActionResult> Details(string id)
+        var products = await _dbContext.Products
+            .OrderBy(p => p.ProductName)
+            .Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.ProductName} - {p.Price:C2} (Stock: {p.StockAvailable})",
+                Disabled = p.StockAvailable <= 0
+            })
+            .ToListAsync();
+
+        products.Insert(0, new SelectListItem { Value = "", Text = "Select Product" });
+
+        var viewModel = existing ?? new OrderCreateViewModel();
+        viewModel.Customers = customers;
+        viewModel.Products = products;
+        return viewModel;
+    }
+
+    private async Task TriggerServerlessPipelineAsync(Data.Order order, Data.Customer customer, Data.Product product, int quantity)
+    {
+        var tableOrder = new Models.Order
         {
-            if (string.IsNullOrWhiteSpace(id)) return NotFound();
-            var entity = await _storage.GetEntityAsync<Order>("Order", id);
-            if (entity is null) return NotFound();
-            return View(entity);
-        }
+            PartitionKey = "Order",
+            RowKey = order.OrderId,
+            CustomerId = customer.CustomerId,
+            Username = customer.Username,
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            Quantity = quantity,
+            UnitPrice = (double)product.Price,
+            TotalPrice = (double)order.TotalPrice,
+            Status = order.Status,
+            OrderDate = order.OrderDate
+        };
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) return RedirectToAction(nameof(Index));
-            await _storage.DeleteEntityAsync<Order>("Order", id);
-            TempData["Message"] = "Order deleted.";
-            return RedirectToAction(nameof(Index));
-        }
+        await _functionsClient.EnqueueOrderAsync(tableOrder);
 
-        [HttpGet]
-        public async Task<IActionResult> GetProductPrice(string productId)
-        {
-            if (string.IsNullOrWhiteSpace(productId))
-                return Json(new { price = 0.0, stock = 0 });
+        var receiptContent = $"Order Receipt\n" +
+                             $"Order ID: {order.OrderId}\n" +
+                             $"Customer: {customer.Name} {customer.Surname}\n" +
+                             $"Product: {product.ProductName}\n" +
+                             $"Quantity: {quantity}\n" +
+                             $"Total: {order.TotalPrice:C}\n" +
+                             $"Date: {order.OrderDate:yyyy-MM-dd HH:mm:ss}\n" +
+                             $"Status: {order.Status}";
 
-            var product = await _storage.GetEntityAsync<Product>("Product", productId);
-            if (product is null)
-                return Json(new { price = 0.0, stock = 0 });
-
-            return Json(new { price = product.Price, stock = product.StockAvailable });
-        }
+        await _functionsClient.WriteFileAsync(receiptContent, "receipts", $"receipt-{order.OrderId}.txt");
     }
 }

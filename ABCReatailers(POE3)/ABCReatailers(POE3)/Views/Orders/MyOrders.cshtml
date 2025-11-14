@@ -1,78 +1,52 @@
-﻿@model ABCRetailers_POE3_.Models.View_Models.RegisterViewModel
+﻿@model IEnumerable<ABCRetailers_POE3_.Data.Order>
 @{
-    ViewData["Title"] = "Create Account";
+    ViewData["Title"] = "My Orders";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-6">
-        <h2 class="mb-4 text-center">Create your ABCRetailers account</h2>
+<section class="hero text-light mb-4">
+    <p class="text-uppercase small text-muted mb-2">Order timeline</p>
+    <h1 class="fw-bold mb-2">Your purchases in one view</h1>
+    <p class="text-muted mb-0">Track statuses as they move through Azure Functions and SQL replication.</p>
+</section>
 
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Surname" class="form-label"></label>
-                    <input asp-for="Surname" class="form-control" />
-                    <span asp-validation-for="Surname" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1">
-                <div class="col-md-6">
-                    <label asp-for="Username" class="form-label"></label>
-                    <input asp-for="Username" class="form-control" autocomplete="username" />
-                    <span asp-validation-for="Username" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" autocomplete="email" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1">
-                <div class="col-md-6">
-                    <label asp-for="Phone" class="form-label"></label>
-                    <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Address" class="form-label"></label>
-                    <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="row g-3 mt-1">
-                <div class="col-md-6">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ConfirmPassword" class="form-label"></label>
-                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-success mt-4 w-100">Register</button>
-
-            <p class="mt-3 text-center">
-                Already have an account?
-                <a asp-action="Login">Sign in</a>
-            </p>
-        </form>
+@if (!Model.Any())
+{
+    <div class="app-card text-center text-muted">
+        <p>No orders yet. Visit the <a asp-controller="Store" asp-action="Index">store</a> to start shopping.</p>
     </div>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
 }
-
+else
+{
+    <div class="my-orders-grid">
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <small>Order</small>
+                        <h5 class="mb-0">@order.OrderId</h5>
+                    </div>
+                    <span class="badge-soft">@order.Status</span>
+                </div>
+                <small>Placed @order.OrderDate.ToString("dd MMM yyyy HH:mm")</small>
+                <hr />
+                <ul class="list-unstyled mb-3">
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <li class="d-flex justify-content-between">
+                            <span>@item.Product?.ProductName ?? item.ProductId.ToString()</span>
+                            <strong>@item.Quantity x @item.UnitPrice.ToString("C")</strong>
+                        </li>
+                    }
+                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small>Total paid</small>
+                        <h4 class="mb-0">@order.TotalPrice.ToString("C")</h4>
+                    </div>
+                    <span class="text-muted small">Dispatched to @order.ShippingAddress</span>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,71 +1,148 @@
-﻿using ABCRetailers_POE3_.Models;
-using ABCRetailers_POE3_.Services;
+﻿using ABCRetailers_POE3_.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace ABCRetailers_POE3_.Controllers
+namespace ABCRetailers_POE3_.Controllers;
+
+[Authorize(Roles = "Admin")]
+public class CustomerController : Controller
 {
-    public class CustomerController : Controller
+    private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<CustomerController> _logger;
+
+    public CustomerController(ApplicationDbContext dbContext, ILogger<CustomerController> logger)
     {
-        private readonly IAzureStorageService _storage;
+        _dbContext = dbContext;
+        _logger = logger;
+    }
 
-        public CustomerController(IAzureStorageService storage)
+    public async Task<IActionResult> Index()
+    {
+        var customers = await _dbContext.Customers
+            .OrderBy(c => c.Surname)
+            .ThenBy(c => c.Name)
+            .ToListAsync();
+
+        return View(customers);
+    }
+
+    public IActionResult Create() => View(new Customer());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Customer model)
+    {
+        if (string.IsNullOrWhiteSpace(model.CustomerId))
         {
-            _storage = storage;
+            ModelState.Remove(nameof(Customer.CustomerId));
+            model.CustomerId = $"CUS-{Guid.NewGuid():N}".Substring(0, 12).ToUpperInvariant();
         }
 
-        public async Task<IActionResult> Index()
+        if (await _dbContext.Customers.AnyAsync(c => c.CustomerId == model.CustomerId))
         {
-            // Lists all Customer entities
-            var customers = await _storage.GetAllEntitiesAsync<Customer>();
-            return View(customers
-                .OrderBy(x => x.Surname)
-                .ThenBy(x => x.Name));
+            ModelState.AddModelError(nameof(Customer.CustomerId), "Customer code already exists.");
         }
 
-        public IActionResult Create() => View(new Customer());
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Customer model)
+        if (await _dbContext.Customers.AnyAsync(c => c.Username == model.Username))
         {
-            if (!ModelState.IsValid) return View(model);
+            ModelState.AddModelError(nameof(Customer.Username), "Username already exists.");
+        }
 
-            await _storage.AddEntityAsync(model);
-            TempData["Message"] = "Customer created.";
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        model.CreatedDate = DateTime.UtcNow;
+        model.UpdatedDate = DateTime.UtcNow;
+
+        _dbContext.Customers.Add(model);
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Customer created.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Edit(int id)
+    {
+        var customer = await _dbContext.Customers.FindAsync(id);
+        if (customer == null)
+        {
+            return NotFound();
+        }
+
+        return View(customer);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Customer model)
+    {
+        if (id != model.Id)
+        {
+            return NotFound();
+        }
+
+        if (await _dbContext.Customers.AnyAsync(c => c.CustomerId == model.CustomerId && c.Id != id))
+        {
+            ModelState.AddModelError(nameof(Customer.CustomerId), "Customer code already exists.");
+        }
+
+        if (await _dbContext.Customers.AnyAsync(c => c.Username == model.Username && c.Id != id))
+        {
+            ModelState.AddModelError(nameof(Customer.Username), "Username already exists.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var customer = await _dbContext.Customers.FindAsync(id);
+        if (customer == null)
+        {
+            return NotFound();
+        }
+
+        customer.CustomerId = model.CustomerId;
+        customer.Username = model.Username;
+        customer.Name = model.Name;
+        customer.Surname = model.Surname;
+        customer.Email = model.Email;
+        customer.Phone = model.Phone;
+        customer.Address = model.Address;
+        customer.UpdatedDate = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        TempData["Message"] = "Customer updated.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var customer = await _dbContext.Customers
+            .Include(c => c.Orders)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (customer == null)
+        {
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Edit(string id)
+        if (customer.Orders.Any())
         {
-            if (string.IsNullOrWhiteSpace(id)) return NotFound();
-
-            var entity = await _storage.GetEntityAsync<Customer>("Customer", id);
-            if (entity is null) return NotFound();
-
-            return View(entity);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Customer model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            model.PartitionKey = "Customer";
-            await _storage.UpdateEntityAsync(model);
-            TempData["Message"] = "Customer updated.";
+            TempData["Error"] = "Cannot delete customer with existing orders.";
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) return RedirectToAction(nameof(Index));
+        _dbContext.Customers.Remove(customer);
+        await _dbContext.SaveChangesAsync();
 
-            await _storage.DeleteEntityAsync<Customer>("Customer", id);
-            TempData["Message"] = "Customer deleted.";
-            return RedirectToAction(nameof(Index));
-        }
+        TempData["Message"] = "Customer deleted.";
+        return RedirectToAction(nameof(Index));
     }
 }

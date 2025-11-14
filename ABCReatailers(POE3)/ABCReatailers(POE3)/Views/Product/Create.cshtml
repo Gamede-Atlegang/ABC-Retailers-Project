@@ -1,4 +1,4 @@
-﻿@model ABCRetailers_POE3_.Models.Product
+﻿@model ABCRetailers_POE3_.Data.Product
 @{
 	ViewData["Title"] = "Add Product";
 }
@@ -7,9 +7,20 @@
 <form asp-action="Create" method="post" enctype="multipart/form-data">
 	<div class="row g-3">
 		<div class="col-md-6">
+			<label asp-for="ProductId" class="form-label">Product SKU (optional)</label>
+			<input asp-for="ProductId" class="form-control" />
+			<span asp-validation-for="ProductId" class="text-danger"></span>
+			<span class="form-text">Leave blank to auto-generate.</span>
+		</div>
+		<div class="col-md-6">
 			<label asp-for="ProductName" class="form-label"></label>
 			<input asp-for="ProductName" class="form-control" />
 			<span asp-validation-for="ProductName" class="text-danger"></span>
+		</div>
+		<div class="col-md-6">
+			<label asp-for="Category" class="form-label"></label>
+			<input asp-for="Category" class="form-control" />
+			<span asp-validation-for="Category" class="text-danger"></span>
 		</div>
 		<div class="col-md-6">
 			<label asp-for="Price" class="form-label"></label>

@@ -1,4 +1,4 @@
-﻿@model ABCRetailers_POE3_.Models.Order
+﻿@model ABCRetailers_POE3_.Models.View_Models.OrderCreateViewModel
 
 @{
 	ViewData["Title"] = "Create Order";
@@ -10,24 +10,12 @@
 	<div class="row g-3">
 		<div class="col-md-6">
 			<label class="form-label">Customer</label>
-			<select asp-for="CustomerId" class="form-select" required>
-				<option value="">Select Customer</option>
-				@foreach (var c in ViewBag.Customers)
-				{
-					<option value="@c.CustomerId">@c.Name @c.Surname (@c.Username)</option>
-				}
-			</select>
+			<select asp-for="CustomerId" class="form-select" asp-items="Model.Customers" required></select>
 			<span asp-validation-for="CustomerId" class="text-danger"></span>
 		</div>
 		<div class="col-md-6">
 			<label class="form-label">Product</label>
-			<select asp-for="ProductId" class="form-select" required>
-				<option value="">Select Product</option>
-				@foreach (var p in ViewBag.Products)
-				{
-					<option value="@p.ProductId" data-price="@p.Price" data-stock="@p.StockAvailable">@p.ProductName - @p.Price.ToString("C2") (Stock: @p.StockAvailable)</option>
-				}
-			</select>
+			<select asp-for="ProductId" class="form-select" asp-items="Model.Products" required></select>
 			<span asp-validation-for="ProductId" class="text-danger"></span>
 		</div>
 		<div class="col-md-6">
@@ -46,6 +34,11 @@
 		<div class="col-md-6">
 			<label class="form-label">Total Price</label>
 			<input id="totalPrice" class="form-control" readonly />
+		</div>
+		<div class="col-12">
+			<label asp-for="ShippingAddress" class="form-label"></label>
+			<textarea asp-for="ShippingAddress" class="form-control" rows="2" placeholder="Leave blank to use customer default"></textarea>
+			<span asp-validation-for="ShippingAddress" class="text-danger"></span>
 		</div>
 	</div>
 	<div class="mt-3">

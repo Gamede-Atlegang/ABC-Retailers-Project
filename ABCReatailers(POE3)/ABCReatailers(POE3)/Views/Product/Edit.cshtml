@@ -1,19 +1,26 @@
-﻿@model ABCRetailers_POE3_.Models.Product
+﻿@model ABCRetailers_POE3_.Data.Product
 @{
 	ViewData["Title"] = "Edit Product";
 }
 <h2>Edit Product</h2>
 <hr />
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
-	<input type="hidden" asp-for="PartitionKey" />
-	<input type="hidden" asp-for="RowKey" />
-	<input type="hidden" asp-for="ETag" />
-	<input type="hidden" asp-for="Timestamp" />
+	<input type="hidden" asp-for="Id" />
 	<div class="row g-3">
+		<div class="col-md-6">
+			<label asp-for="ProductId" class="form-label"></label>
+			<input asp-for="ProductId" class="form-control" />
+			<span asp-validation-for="ProductId" class="text-danger"></span>
+		</div>
 		<div class="col-md-6">
 			<label asp-for="ProductName" class="form-label"></label>
 			<input asp-for="ProductName" class="form-control" />
 			<span asp-validation-for="ProductName" class="text-danger"></span>
+		</div>
+		<div class="col-md-6">
+			<label asp-for="Category" class="form-label"></label>
+			<input asp-for="Category" class="form-control" />
+			<span asp-validation-for="Category" class="text-danger"></span>
 		</div>
 		<div class="col-md-6">
 			<label asp-for="Price" class="form-label"></label>

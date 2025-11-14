@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ABCRetailers_POE3_.Models.Order>
+﻿@model IEnumerable<ABCRetailers_POE3_.Data.Order>
 
 @{
 	ViewData["Title"] = "Orders";
@@ -44,7 +44,7 @@
 		<tr>
 			<th>Order ID</th>
 			<th>Customer</th>
-			<th>Product</th>
+			<th>Product(s)</th>
 			<th>Quantity</th>
 			<th class="text-end">Total</th>
 			<th>Status</th>
@@ -56,10 +56,15 @@
 		@foreach (var o in Model)
 		{
 			<tr>
+                @{
+                    var firstItem = o.OrderItems.FirstOrDefault();
+                    var productName = firstItem?.Product?.ProductName ?? firstItem?.ProductId.ToString() ?? "N/A";
+                    var quantity = firstItem?.Quantity ?? o.OrderItems.Sum(i => i.Quantity);
+                }
 				<td>@o.OrderId</td>
-				<td>@o.Username</td>
-				<td>@o.ProductName</td>
-				<td>@o.Quantity</td>
+				<td>@($"{o.Customer?.Name} {o.Customer?.Surname}")</td>
+				<td>@productName</td>
+				<td>@quantity</td>
 				<td class="text-end">@o.TotalPrice.ToString("C2")</td>
 				<td>
 					<span class="badge @(o.Status switch {
@@ -75,9 +80,9 @@
 				</td>
 				<td>@o.OrderDate.ToString("MM/dd/yyyy")</td>
 				<td class="text-end">
-					<a class="btn btn-sm btn-outline-info" asp-action="Details" asp-route-id="@o.OrderId">Details</a>
-					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@o.OrderId">Edit</a>
-					<form asp-action="Delete" asp-route-id="@o.OrderId" method="post" class="d-inline">
+					<a class="btn btn-sm btn-outline-info" asp-action="Details" asp-route-id="@o.Id">Details</a>
+					<a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@o.Id">Edit</a>
+					<form asp-action="Delete" asp-route-id="@o.Id" method="post" class="d-inline">
 						<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this order?');">Delete</button>
 					</form>
 				</td>
