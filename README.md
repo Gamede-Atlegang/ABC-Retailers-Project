@@ -1,4 +1,3 @@
-# CLDV6212POE
 
 ABC Retailers - Azure Storage Integration
 
